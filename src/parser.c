@@ -14,7 +14,8 @@ ParseResult parse_line(const char *line, ParsedJob *out, int *wait_seconds)
 
     out->job.client_id = atoi(client + 3);
 
-    if (strcmp(cmd, "PRIMES") == 0 || strcmp(cmd, "PRIMEDIVISORS") == 0) {
+    if (strcmp(cmd, "PRIMES") == 0 || strcmp(cmd, "PRIMEDIVISORS") == 0)
+    {
         long *n = malloc(sizeof(long));
         sscanf(line, "%*s %*s %ld", n);
 
@@ -24,7 +25,8 @@ ParseResult parse_line(const char *line, ParsedJob *out, int *wait_seconds)
         return PARSE_JOB;
     }
 
-    if (strcmp(cmd, "ANAGRAMS") == 0) {
+    if (strcmp(cmd, "ANAGRAMS") == 0)
+    {
         char *name = malloc(MAX_NAME);
         sscanf(line, "%*s %*s %s", name);
 

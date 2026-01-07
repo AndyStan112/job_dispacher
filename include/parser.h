@@ -3,18 +3,21 @@
 
 #include "common.h"
 
-typedef enum {
+typedef enum
+{
     PARSE_JOB,
     PARSE_WAIT,
     PARSE_INVALID
 } ParseResult;
 
-typedef struct {
+typedef struct
+{
     void *data;
     int size;
 } JobParams;
 
-typedef struct {
+typedef struct
+{
     Job job;
     JobParams params;
 } ParsedJob;

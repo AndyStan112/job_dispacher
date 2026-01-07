@@ -11,13 +11,17 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    if (rank == 0) {
-        if (argc < 2) {
+    if (rank == 0)
+    {
+        if (argc < 2)
+        {
             MPI_Finalize();
             return 0;
         }
         run_dispatcher(argv[1], size);
-    } else {
+    }
+    else
+    {
         run_worker();
     }
 

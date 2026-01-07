@@ -6,13 +6,15 @@
 #define MAX_LINE 256
 #define MAX_NAME 16
 
-typedef enum {
+typedef enum
+{
     CMD_PRIMES,
     CMD_PRIMEDIVISORS,
     CMD_ANAGRAMS
 } CommandType;
 
-typedef struct {
+typedef struct
+{
     int job_id;
     int client_id;
     CommandType type;
@@ -20,9 +22,12 @@ typedef struct {
     double t_dispatched;
 } Job;
 
-typedef struct {
+typedef struct
+{
     int job_id;
     int client_id;
-} Result;
+    int status;
+    int payload_size;
+} ResultHeader;
 
 #endif
