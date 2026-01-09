@@ -7,6 +7,23 @@
 #include "protocol.h"
 #include "common.h"
 
+static FILE *logf = NULL;
+
+static const char *cmd_name(int type)
+{
+    switch (type)
+    {
+    case CMD_PRIMES:
+        return "PRIMES";
+    case CMD_PRIMEDIVISORS:
+        return "PRIMEDIVISORS";
+    case CMD_ANAGRAMS:
+        return "ANAGRAMS";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 static void print_and_store_result(int worker, const ResultHeader *hdr)
 {
     void *payload = NULL;
@@ -51,6 +68,11 @@ static void print_and_store_result(int worker, const ResultHeader *hdr)
         printf("ERROR: %s\n", payload ? (char *)payload : "");
     }
 
+    fprintf(logf,
+            "job=%d client=CLI%d worker=%d cmd=%s t_finished=%.6f\n",
+            hdr->job_id, hdr->client_id, worker,
+            cmd_name(hdr->type), MPI_Wtime());
+
     free(payload);
 }
 
@@ -79,6 +101,7 @@ static void poll_results(int world_size,
 void run_dispatcher(const char *filename, int world_size)
 {
     FILE *f = fopen(filename, "r");
+    logf = fopen("out/logs.txt", "w");
     if (!f)
         return;
 
@@ -145,6 +168,11 @@ void run_dispatcher(const char *filename, int world_size)
                  worker, TAG_JOB_HEADER, MPI_COMM_WORLD);
 
         pj.job.t_dispatched = MPI_Wtime();
+        fprintf(logf,
+                "job=%d client=CLI%d worker=%d cmd=%s t_received=%.6f t_dispatched=%.6f\n",
+                pj.job.job_id, pj.job.client_id, worker,
+                cmd_name(pj.job.type),
+                pj.job.t_received, pj.job.t_dispatched);
 
         MPI_Send(pj.params.data, pj.params.size, MPI_BYTE,
                  worker, TAG_JOB_PARAMS, MPI_COMM_WORLD);
@@ -191,6 +219,8 @@ void run_dispatcher(const char *filename, int world_size)
     for (int i = 1; i < world_size; i++)
         MPI_Send(NULL, 0, MPI_BYTE, i, TAG_TERMINATE, MPI_COMM_WORLD);
 
+    if (logf)
+        fclose(logf);
     free(idle);
     free(requests);
     free(headers);
