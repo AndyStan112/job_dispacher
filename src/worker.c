@@ -39,6 +39,7 @@ void run_worker(void)
         ResultHeader hdr;
         hdr.job_id = job.job_id;
         hdr.client_id = job.client_id;
+        hdr.type = job.type;
         hdr.status = (rc == 0) ? 0 : 1;
         hdr.payload_size = out_size;
 

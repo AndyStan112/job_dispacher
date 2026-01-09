@@ -7,7 +7,7 @@
 #include "protocol.h"
 #include "common.h"
 
-static void print_result(int worker, const ResultHeader *hdr)
+static void print_and_store_result(int worker, const ResultHeader *hdr)
 {
     void *payload = NULL;
 
@@ -28,6 +28,23 @@ static void print_result(int worker, const ResultHeader *hdr)
             printf("result=%ld\n", *(long *)payload);
         else
             printf("result=(binary %d bytes)\n", hdr->payload_size);
+
+        FILE *outf;
+        char out_filename[64];
+        snprintf(out_filename, sizeof(out_filename), "out/CLI%d", hdr->client_id);
+        outf = fopen(out_filename, "wb");
+        if (outf)
+        {
+            if (hdr->type == CMD_ANAGRAMS)
+            {
+                fwrite(payload, 1, (size_t)hdr->payload_size, outf);
+            }
+            else
+            {
+                fprintf(outf, "%d", *(long *)payload);
+            }
+            fclose(outf);
+        }
     }
     else
     {
@@ -53,7 +70,7 @@ static void poll_results(int world_size,
         if (!flag || idx == MPI_UNDEFINED)
             break;
 
-        print_result(idx, &headers[idx]);
+        print_and_store_result(idx, &headers[idx]);
         requests[idx] = MPI_REQUEST_NULL;
         idle[(*idle_count)++] = idx;
     }
@@ -112,7 +129,7 @@ void run_dispatcher(const char *filename, int world_size)
             if (idx == MPI_UNDEFINED)
                 continue;
 
-            print_result(idx, &headers[idx]);
+            print_and_store_result(idx, &headers[idx]);
             requests[idx] = MPI_REQUEST_NULL;
             idle[idle_count++] = idx;
 
@@ -165,7 +182,7 @@ void run_dispatcher(const char *filename, int world_size)
         if (idx == MPI_UNDEFINED)
             continue;
 
-        print_result(idx, &headers[idx]);
+        print_and_store_result(idx, &headers[idx]);
         requests[idx] = MPI_REQUEST_NULL;
 
         poll_results(world_size, requests, headers, idle, &idle_count);

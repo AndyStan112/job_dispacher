@@ -26,8 +26,9 @@ typedef struct
 {
     int job_id;
     int client_id;
+    CommandType type;
     int status;
     int payload_size;
-} ResultHeader;
+} ResultHeader; 
 
 #endif
