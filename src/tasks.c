@@ -5,6 +5,7 @@
 #include <math.h>
 #include "tasks.h"
 #include <stdbool.h>
+#include <unistd.h>
 
 static int make_text_payload(const char *s, void **out_data, int *out_size)
 {
@@ -161,7 +162,7 @@ static int generate_anagrams_text(const char *name, void **out_data, int *out_si
         return make_text_payload("", out_data, out_size);
     if (n > 8)
         return make_text_payload("ERROR: name too long (max 8)\n", out_data, out_size);
-
+    sleep(5);
     char sorted[9];
     memcpy(sorted, name, (long)n + 1);
     qsort(sorted, (long)n, sizeof(char), cmp);
