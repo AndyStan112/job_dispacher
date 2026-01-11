@@ -55,3 +55,9 @@ dkms.conf
 *.dwo
 
 out
+.venv
+pychache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

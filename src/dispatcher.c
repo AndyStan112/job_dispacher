@@ -7,6 +7,8 @@
 #include "protocol.h"
 #include "common.h"
 
+#define DEBUG
+
 static FILE *logf = NULL;
 
 static const char *cmd_name(int type)
@@ -35,17 +37,21 @@ static void print_and_store_result(int worker, const ResultHeader *hdr)
                  worker, TAG_RESULT_DATA,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
+#ifdef DEBUG
 
     printf("Job %d client CLI%d: ",
            hdr->job_id, hdr->client_id);
 
+#endif
     if (hdr->status == 0)
     {
+#ifdef DEBUG
+
         if (hdr->payload_size == (int)sizeof(long))
             printf("result=%ld\n", *(long *)payload);
         else
             printf("result=(binary %d bytes)\n", hdr->payload_size);
-
+#endif
         FILE *outf;
         char out_filename[64];
         snprintf(out_filename, sizeof(out_filename), "out/CLI%d", hdr->client_id);
@@ -121,7 +127,7 @@ void run_dispatcher(const char *filename, int world_size)
 
     int job_id = 0;
     char line[MAX_LINE];
-
+    double start_time = MPI_Wtime();
     while (fgets(line, sizeof(line), f))
     {
         poll_results(world_size, requests, headers, idle, &idle_count);
@@ -218,6 +224,9 @@ void run_dispatcher(const char *filename, int world_size)
 
     for (int i = 1; i < world_size; i++)
         MPI_Send(NULL, 0, MPI_BYTE, i, TAG_TERMINATE, MPI_COMM_WORLD);
+
+    double end_time = MPI_Wtime();
+    printf("All jobs completed in %.2f seconds.\n", end_time - start_time);
 
     if (logf)
         fclose(logf);

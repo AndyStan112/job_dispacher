@@ -29,6 +29,6 @@ typedef struct
     CommandType type;
     int status;
     int payload_size;
-} ResultHeader; 
+} ResultHeader;
 
 #endif
